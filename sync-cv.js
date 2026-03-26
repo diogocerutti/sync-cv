@@ -17,7 +17,9 @@ const {
 const pdfPath = process.argv[2];
 
 if (!pdfPath) {
-  console.error('Uso: node sync-cv.js "C:\\caminho\\curriculo.pdf"');
+  console.error(
+    'Uso: node sync-cv.js "C:\Users\diogo\OneDrive\Documentos\curriculo.pdf"',
+  );
   process.exit(1);
 }
 
