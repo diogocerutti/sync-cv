@@ -37,7 +37,12 @@ async function uploadToGitHub(fileBuffer, fileName) {
     throw new Error("Variáveis do GitHub ausentes no .env");
   }
 
-  const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
+  // Corrige encoding do caminho (importante para subpastas)
+  const encodedPath = GITHUB_FILE_PATH.split("/")
+    .map((part) => encodeURIComponent(part))
+    .join("/");
+
+  const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${encodedPath}`;
 
   let sha = null;
 
@@ -72,16 +77,20 @@ async function uploadToGitHub(fileBuffer, fileName) {
     },
   );
 
-  console.log("GitHub atualizado com sucesso.");
-  console.log(
-    `URL esperada: https://${GITHUB_OWNER}.github.io/${GITHUB_FILE_PATH}`,
-  );
+  console.log("✔ GitHub atualizado com sucesso.");
+  console.log(`URL: https://${GITHUB_OWNER}.github.io/${GITHUB_FILE_PATH}`);
 }
 
 async function openLinkedInPage() {
-  const linkedinUrl = "https://www.linkedin.com/jobs/application-settings/";
-  await open(linkedinUrl);
-  console.log("Página do LinkedIn aberta.");
+  const url = "https://www.linkedin.com/jobs/application-settings/";
+  await open(url);
+  console.log("🔗 LinkedIn aberto.");
+}
+
+async function openIndeedPage() {
+  const url = "https://profile.indeed.com/resume";
+  await open(url);
+  console.log("🔗 Indeed aberto.");
 }
 
 async function main() {
@@ -92,20 +101,22 @@ async function main() {
     logStep("Enviando para o GitHub");
     await uploadToGitHub(fileBuffer, fileName);
 
-    logStep("Abrindo o LinkedIn");
+    logStep("Abrindo páginas para atualização manual");
     await openLinkedInPage();
+    await openIndeedPage();
 
     logStep("Concluído");
-    console.log(
-      "Seu currículo foi enviado para o GitHub e a página do LinkedIn foi aberta.",
-    );
+    console.log("✔ GitHub sincronizado");
+    console.log("⏳ Atualize manualmente LinkedIn e Indeed (abas já abertas)");
   } catch (error) {
     console.error("\nErro:");
+
     if (error.response?.data) {
       console.error(JSON.stringify(error.response.data, null, 2));
     } else {
       console.error(error.message);
     }
+
     process.exit(1);
   }
 }
